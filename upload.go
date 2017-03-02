@@ -153,7 +153,6 @@ func Create(url string, h http.Header, c *http.Client) (io.WriteCloser, error) {
 
 func (u *uploader) upload() {
 	for p := range u.parts {
-		u.wg.Add(1)
 		if err := p.Upload(); err != nil {
 			u.err = err
 		}
@@ -193,6 +192,7 @@ func (u *uploader) Write(p []byte) (int, error) {
 }
 
 func (u *uploader) flush() {
+	u.wg.Add(1)
 	u.size = min(u.size+u.size/1000, maxPartSize)
 	b := cloneBytes(u.buf.Bytes())
 	c := u.md5.Sum(nil)
