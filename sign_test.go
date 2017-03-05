@@ -82,18 +82,18 @@ func TestSign(t *testing.T) {
 }
 
 func BenchmarkSign(b *testing.B) {
-	b.ReportAllocs()
 	s := &AWSSigner{
 		Region:    "us-east-1",
 		AccessKey: "AKIAIOSFODNN7EXAMPLE",
 		SecretKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
 	}
+	req, err := http.NewRequest("GET", "https://s3.amazonaws.com/examplebucket/test.txt", nil)
+	if err != nil {
+		b.Error(err)
+	}
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		req, err := http.NewRequest("GET", "https://s3.amazonaws.com/examplebucket/test.txt", nil)
-		if err != nil {
-			b.Error(err)
-		}
 		s.Sign(req)
 	}
 }
