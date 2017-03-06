@@ -70,6 +70,7 @@ func Walk(uri string, walkFn WalkFunc, client *http.Client) error {
 	if err != nil {
 		return err
 	}
+	u.Scheme = "https"
 	path := strings.Split(u.Path, "/")
 	u.Path = strings.Join(path[:2], "/")
 	prefix := strings.Join(path[2:], "/")
@@ -171,4 +172,31 @@ func readObjects(u *url.URL, prefix string, c *http.Client) (objects []os.FileIn
 		}
 	}
 	return objects, nil
+}
+
+// Remove removes the given object.
+func Remove(uri string, c *http.Client) error {
+	if c == nil {
+		c = DefaultClient
+	}
+
+	u, err := url.Parse(uri)
+	if err != nil {
+		return err
+	}
+	u.Scheme = "https"
+
+	req, err := http.NewRequest("DELETE", u.String(), nil)
+	if err != nil {
+		return err
+	}
+	resp, err := retry(retryNoBody(c, req), retries)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 204 {
+		return newResponseError(resp)
+	}
+	return nil
 }

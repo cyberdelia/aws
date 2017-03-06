@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strconv"
 	"sync"
 )
@@ -72,13 +73,19 @@ type downloader struct {
 }
 
 // Open opens an S3 object at url and return a io.ReadCloser.
-func Open(url string, c *http.Client) (io.ReadCloser, http.Header, error) {
+func Open(uri string, c *http.Client) (io.ReadCloser, http.Header, error) {
 	if c == nil {
 		c = DefaultClient
 	}
 
+	u, err := url.Parse(uri)
+	if err != nil {
+		return nil, nil, err
+	}
+	u.Scheme = "https"
+
 	// Retrieve Content-Length
-	req, err := http.NewRequest("HEAD", url, nil)
+	req, err := http.NewRequest("HEAD", u.String(), nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -109,7 +116,7 @@ func Open(url string, c *http.Client) (io.ReadCloser, http.Header, error) {
 			done:      make(chan bool),
 			buf:       new(bytes.Buffer),
 			client:    c,
-			url:       url,
+			url:       u.String(),
 			readAhead: d.readAhead,
 			header: http.Header{
 				"Range": {fmt.Sprintf("bytes=%d-%d", i, i+size-1)},

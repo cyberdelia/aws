@@ -27,12 +27,12 @@ import "github.com/cyberdelia/s3"
 ## Usage
 
 ```go
-w, err := s3.Create("https://s3-us-west-2.amazonaws.com/buckt_name/file.txt", nil, nil)
+w, err := s3.Create("s3://s3-us-west-2.amazonaws.com/bucket_name/file.txt", nil, nil)
 if err != nil {
     //...
 }
 
-r, _, err := s3.Open("https://s3-us-west-2.amazonaws.com/buckt_name/file.txt", nil)
+r, _, err := s3.Open("s3://s3-us-west-2.amazonaws.com/bucket_name/file.txt", nil)
 if err != nil {
     //...
 }
@@ -43,7 +43,7 @@ walkFn := func(name string, info os.FileInfo) error {
     }
     return nil
 }
-if err := s3.Walk("https://s3-us-west-2.amazonaws.com/buckt_name/", walkFn, nil); err != nil {
+if err := s3.Walk("s3://s3-us-west-2.amazonaws.com/bucket_name/", walkFn, nil); err != nil {
     // ...
 }
 ```

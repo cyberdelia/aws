@@ -6,7 +6,7 @@ import (
 )
 
 func ExampleOpen() {
-	r, _, err := Open("https://s3-us-west-2.amazonaws.com/buckt_name/file.txt", nil)
+	r, _, err := Open("s3://s3-us-west-2.amazonaws.com/bucket_name/file.txt", nil)
 	if err != nil {
 		return
 	}

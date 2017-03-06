@@ -102,24 +102,31 @@ type uploader struct {
 
 // Create creates an S3 object at url and sends multipart upload requests as
 // data is written.
-func Create(url string, h http.Header, c *http.Client) (io.WriteCloser, error) {
+func Create(uri string, h http.Header, c *http.Client) (io.WriteCloser, error) {
 	if c == nil {
 		c = DefaultClient
 	}
+
+	u, err := url.Parse(uri)
+	if err != nil {
+		return nil, err
+	}
+	u.Scheme = "https"
+
 	buf := new(bytes.Buffer)
 	m := md5.New()
-	u := &uploader{
+	up := &uploader{
 		client: c,
 		size:   minPartSize,
 		buf:    buf,
 		parts:  make(chan *part),
-		url:    url,
+		url:    u.String(),
 		md5:    m,
 		w:      io.MultiWriter(buf, m),
 	}
 
 	// Create multi-part upload.
-	req, err := http.NewRequest("POST", url+"?uploads", nil)
+	req, err := http.NewRequest("POST", u.String()+"?uploads", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +135,7 @@ func Create(url string, h http.Header, c *http.Client) (io.WriteCloser, error) {
 			req.Header.Add(k, v)
 		}
 	}
-	resp, err := retry(retryNoBody(u.client, req), retries)
+	resp, err := retry(retryNoBody(up.client, req), retries)
 	if err != nil {
 		return nil, err
 	}
@@ -142,13 +149,13 @@ func Create(url string, h http.Header, c *http.Client) (io.WriteCloser, error) {
 	if err := xml.NewDecoder(resp.Body).Decode(&mu); err != nil {
 		return nil, err
 	}
-	u.uploadID = mu.UploadID
+	up.uploadID = mu.UploadID
 
 	// Start uploading parts.
 	for i := 0; i < concurrency; i++ {
-		go u.upload()
+		go up.upload()
 	}
-	return u, nil
+	return up, nil
 }
 
 func (u *uploader) upload() {
