@@ -58,7 +58,13 @@ func ExampleWalk() {
 		}
 		return nil
 	}
-	if err := Walk("s3://s3-us-west-2.amazonaws.com/buckt_name/", walkFn, nil); err != nil {
+	if err := Walk("s3://s3-us-west-2.amazonaws.com/bucket_name/", walkFn, nil); err != nil {
+		return
+	}
+}
+
+func ExampleRemove() {
+	if err := Remove("s3://s3-us-west-2.amazonaws.com/bucket_name/object.txt", nil); err != nil {
 		return
 	}
 }
