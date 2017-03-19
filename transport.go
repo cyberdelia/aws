@@ -1,11 +1,13 @@
-package s3
+package aws
 
-import "net/http"
+import (
+	"errors"
+	"net/http"
+)
 
-// Transport allows to make signed calls to AWS S3 endpoints.
+// Transport allows to make signed calls to AWS endpoints.
 type Transport struct {
 	// Signer is the underlying request signer used when making requests.
-	// It will default to DefaultSigner if nil.
 	Signer Signer
 
 	// Transport is the underlying HTTP transport to use when making requests.
@@ -17,16 +19,12 @@ type Transport struct {
 func (t *Transport) RoundTrip(r *http.Request) (*http.Response, error) {
 	r = cloneRequest(r)
 
-	t.signer().Sign(r)
+	if t.Signer == nil {
+		return nil, errors.New("aws: no signer set")
+	}
+	t.Signer.Sign(r)
 
 	return t.transport().RoundTrip(r)
-}
-
-func (t *Transport) signer() Signer {
-	if t.Signer != nil {
-		return t.Signer
-	}
-	return DefaultSigner
 }
 
 func (t *Transport) transport() http.RoundTripper {

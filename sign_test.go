@@ -1,4 +1,4 @@
-package s3
+package aws
 
 import (
 	"net/http"
@@ -58,13 +58,14 @@ func TestSign(t *testing.T) {
 			auth:   "AWS4-HMAC-SHA256 Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=34b48302e7b5fa45bde8084f4b7868a86f0a534bc59db6670ed5711ef69dc6f7",
 		},
 	}
-	s := &AWSSigner{
+	s := &V4Signer{
 		Clock: func() time.Time {
 			return c
 		},
 		Region:    "us-east-1",
 		AccessKey: "AKIAIOSFODNN7EXAMPLE",
 		SecretKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+		Service:   "s3",
 	}
 	for i, ts := range tests {
 		req := ts.req()
@@ -82,10 +83,11 @@ func TestSign(t *testing.T) {
 }
 
 func BenchmarkSign(b *testing.B) {
-	s := &AWSSigner{
+	s := &V4Signer{
 		Region:    "us-east-1",
 		AccessKey: "AKIAIOSFODNN7EXAMPLE",
 		SecretKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+		Service:   "s3",
 	}
 	req, err := http.NewRequest("GET", "https://s3.amazonaws.com/examplebucket/test.txt", nil)
 	if err != nil {

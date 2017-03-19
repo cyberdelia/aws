@@ -1,4 +1,4 @@
-package s3
+package aws
 
 import (
 	"crypto/hmac"
@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"io"
 	"net/http"
-	"os"
 	"regexp"
 	"sort"
 	"strings"
@@ -28,38 +27,31 @@ var ignoredHeaders = map[string]bool{
 	"User-Agent":     true,
 }
 
-// DefaultSigner is the default Signer and is use for all requests.
-var DefaultSigner = &AWSSigner{
-	Region:        os.Getenv("AWS_REGION"),
-	AccessKey:     os.Getenv("AWS_ACCESS_KEY_ID"),
-	SecretKey:     os.Getenv("AWS_SECRET_ACCESS_KEY"),
-	SecurityToken: os.Getenv("AWS_SECURITY_TOKEN"),
-}
-
 // Signer allows to sign a request..
 type Signer interface {
 	Sign(*http.Request)
 }
 
-// AWSSigner allows to sign a request following AWS V4 signature requirements.
-type AWSSigner struct {
+// V4Signer allows to sign a request following AWS V4 signature requirements.
+type V4Signer struct {
 	Region        string
 	SecretKey     string
 	AccessKey     string
 	SecurityToken string
+	Service       string
 
 	Clock func() time.Time
 }
 
 // Transport returns a http.RoundTripper using this signer to sign requests.
-func (s *AWSSigner) Transport() http.RoundTripper {
+func (s *V4Signer) Transport() http.RoundTripper {
 	return &Transport{
 		Signer: s,
 	}
 }
 
 // Sign signs the given http.Request.
-func (s *AWSSigner) Sign(r *http.Request) {
+func (s *V4Signer) Sign(r *http.Request) {
 	clock := s.Clock
 	if clock == nil {
 		clock = time.Now
@@ -94,7 +86,7 @@ func (s *AWSSigner) Sign(r *http.Request) {
 	credential := strings.Join([]string{
 		now.Format(shortFormat),
 		region,
-		"s3",
+		s.Service,
 		"aws4_request",
 	}, "/")
 
@@ -152,7 +144,7 @@ func (s *AWSSigner) Sign(r *http.Request) {
 
 	dateHMAC := sign([]byte("AWS4"+s.SecretKey), []byte(now.Format(shortFormat)))
 	regionHMAC := sign(dateHMAC, []byte(region))
-	serviceHMAC := sign(regionHMAC, []byte("s3"))
+	serviceHMAC := sign(regionHMAC, []byte(s.Service))
 	credentialsHMAC := sign(serviceHMAC, []byte("aws4_request"))
 	signature := hex.EncodeToString(sign(credentialsHMAC, []byte(stringToSign)))
 
@@ -165,7 +157,7 @@ func (s *AWSSigner) Sign(r *http.Request) {
 	r.Header.Set("Authorization", strings.Join(parts, ","))
 }
 
-func (s *AWSSigner) region(host string) string {
+func (s *V4Signer) region(host string) string {
 	switch host {
 	case "s3.amazonaws.com", "s3-external-1.amazonaws.com":
 		return "us-east-1"
