@@ -15,13 +15,13 @@ streamed upload and download of S3 objects.
 Download and install:
 
 ```
-$ go get github.com/cyberdelia/s3
+$ go get github.com/cyberdelia/aws/s3
 ```
 
 Add it to your code:
 
 ```go
-import "github.com/cyberdelia/s3"
+import "github.com/cyberdelia/aws/s3"
 ```
 
 ## Usage
