@@ -154,6 +154,21 @@ func (d *downloader) Read(p []byte) (int, error) {
 	return d.r.Read(p)
 }
 
+func (d *downloader) WriteTo(w io.Writer) (n int64, err error) {
+	buf := make([]byte, minPartSize)
+	for {
+		m, err := d.Read(buf)
+		if err != nil && err != io.EOF {
+			return n, err
+		}
+		m, err = w.Write(buf[:m])
+		n += int64(m)
+		if err != nil || err == io.EOF {
+			return n, err
+		}
+	}
+}
+
 func (d *downloader) Close() error {
 	if d.err != nil {
 		return d.err

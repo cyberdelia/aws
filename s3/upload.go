@@ -198,6 +198,21 @@ func (u *uploader) Write(p []byte) (int, error) {
 	return n, nil
 }
 
+func (u *uploader) ReadFrom(r io.Reader) (n int64, err error) {
+	buf := make([]byte, minPartSize)
+	for {
+		m, err := r.Read(buf)
+		if err != nil && err != io.EOF {
+			return n, err
+		}
+		m, err = u.Write(buf[:m])
+		n += int64(m)
+		if err != nil || err == io.EOF {
+			return n, err
+		}
+	}
+}
+
 func (u *uploader) flush() {
 	u.wg.Add(1)
 	u.size = min(u.size+u.size/1000, maxPartSize)
