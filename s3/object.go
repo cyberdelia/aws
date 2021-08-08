@@ -56,10 +56,10 @@ type Object struct {
 // as an error by any function.
 var SkipDir = errors.New("skip this directory")
 
-// WalkFunc is the type of the function called for each objects visited by Walk.
+// WalkFunc is the type of the function called for each object visited by Walk.
 type WalkFunc func(name string, info os.FileInfo) error
 
-// Walk walks the bucket starting at prefix, calling walkFn for each objects
+// Walk walks the bucket starting at prefix, calling walkFn for each object
 // in the bucket.
 func Walk(uri string, walkFn WalkFunc, client *http.Client) error {
 	c := client

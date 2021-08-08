@@ -72,7 +72,7 @@ type downloader struct {
 	err error
 }
 
-// Open opens an S3 object at url and return a io.ReadCloser.
+// Open opens an S3 object at url and return an io.ReadCloser.
 func Open(uri string, c *http.Client) (io.ReadCloser, http.Header, error) {
 	if c == nil {
 		c = DefaultClient

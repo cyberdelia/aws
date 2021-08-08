@@ -8,7 +8,7 @@ streamed upload and download of S3 objects.
 - *Streaming*: Parallel and streaming upload and download for efficient operations.
 - *Integrity checks*: Integrity checks are done during multi-part upload.
 - *Retries*: Every call to s3 are retried according to Amazon S3 recommendations.
-- *Memory conscious*: s3 tries to make a concious usage of memory during upload and download.
+- *Memory conscious*: s3 tries to make a conscious usage of memory during upload and download.
 
 ## Installation
 

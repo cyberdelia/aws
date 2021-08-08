@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-// Transport allows to make signed calls to AWS endpoints.
+// Transport allows making signed calls to AWS endpoints.
 type Transport struct {
 	// Signer is the underlying request signer used when making requests.
 	Signer Signer

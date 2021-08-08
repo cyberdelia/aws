@@ -27,7 +27,7 @@ var ignoredHeaders = map[string]bool{
 	"User-Agent":     true,
 }
 
-// Signer allows to sign a request..
+// Signer allows to sign a request.
 type Signer interface {
 	Sign(*http.Request)
 }
@@ -115,11 +115,6 @@ func (s *V4Signer) Sign(r *http.Request) {
 
 	r.URL.RawQuery = strings.Replace(r.URL.Query().Encode(), "+", "%20", -1)
 	uri := uriEncode(r.URL.Path)
-	// if uri != "" {
-	// 	uri = "/" + strings.Join(strings.Split(uri, "/")[3:], "/")
-	// } else {
-	// 	uri = r.URL.EscapedPath()
-	// }
 	if uri == "" {
 		uri = "/"
 	}
@@ -166,7 +161,7 @@ func (s *V4Signer) region(host string) string {
 			return region
 		}
 		// Couldn't detect a region based on hostname, so use the given one.
-		// This allow to support S3 accelerate too.
+		// This allows to support S3 accelerate too.
 		return s.Region
 	}
 }

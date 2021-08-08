@@ -71,7 +71,7 @@ func TestRetryNoBodyError(t *testing.T) {
 func TestRetryWithBody(t *testing.T) {
 	defer func() {
 		if r := recover(); r == nil {
-			t.Error("should have paniced")
+			t.Error("should have panicked")
 		}
 	}()
 	req, _ := http.NewRequest("GET", "http://example.org", strings.NewReader("<>"))
